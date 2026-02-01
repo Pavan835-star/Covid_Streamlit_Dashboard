@@ -7,12 +7,20 @@ st.markdown("""
 This dashboard explores global COVID-19 trends, vaccination progress,
 and their relationship with deaths across countries.
 """)
-@st.cache_data
-def load_data():
-    df = pd.read_csv(r"C:\Users\pavan\Desktop\Data Visualization Project\owid-covid-data.csv")
-    df['date'] = pd.to_datetime(df['date'])
-    return df
+import streamlit as st
+import pandas as pd
+import requests
+from io import StringIO
 
+@st.cache_data(ttl=24*60*60)
+def load_data():
+    url = "https://raw.githubusercontent.com/owid/covid-19-data/master/public/data/owid-covid-data.csv"
+    r = requests.get(url, timeout=120)
+    r.raise_for_status()
+    df = pd.read_csv(StringIO(r.text))
+    df["date"] = pd.to_datetime(df["date"])
+    return df
+    
 df = load_data()
 countries = df['location'].unique()
 selected_country = st.sidebar.selectbox(
@@ -75,4 +83,5 @@ fig3 = px.scatter(
 st.plotly_chart(fig3, use_container_width=True)
 st.subheader("Filtered Data Preview")
 st.dataframe(filtered_df.head(50))
+
 
