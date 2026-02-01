@@ -41,12 +41,16 @@ latest = filtered_df.sort_values('date').iloc[-1]
 
 col1, col2, col3 = st.columns(3)
 
-col1.metric("Total Cases", f"{int(latest['total_cases']):,}")
-col2.metric("Total Deaths", f"{int(latest['total_deaths']):,}")
-col3.metric(
-    "Fully Vaccinated (%)",
-    f"{latest['people_fully_vaccinated_per_hundred']:.1f}"
-)
+def fmt_int(x):
+    return f"{int(x):,}" if pd.notna(x) else "N/A"
+
+def fmt_float1(x):
+    return f"{float(x):.1f}" if pd.notna(x) else "N/A"
+
+col1.metric("Total Cases", fmt_int(latest.get("total_cases")))
+col2.metric("Total Deaths", fmt_int(latest.get("total_deaths")))
+col3.metric("Fully Vaccinated (%)", fmt_float1(latest.get("people_fully_vaccinated_per_hundred")))
+
 fig = px.area(
     filtered_df,
     x="date",
@@ -83,5 +87,6 @@ fig3 = px.scatter(
 st.plotly_chart(fig3, use_container_width=True)
 st.subheader("Filtered Data Preview")
 st.dataframe(filtered_df.head(50))
+
 
 
